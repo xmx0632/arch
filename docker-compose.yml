@@ -1,0 +1,72 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/logs:/var/log/nginx
+    networks:
+      - app-network
+
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    ports:
+      - "2181:2181"
+    volumes:
+      - ./zookeeper/data:/data
+      - ./zookeeper/datalog:/datalog
+    networks:
+      - app-network
+
+  kafka:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "flume_topic:1:1"
+    volumes:
+      - ./kafka/data:/var/lib/kafka/data
+    depends_on:
+      - zookeeper
+    networks:
+      - app-network
+
+  flume:
+    image: probablyfine/flume:latest
+    volumes:
+      - ./flume/conf:/opt/flume/conf
+      - ./nginx/logs:/var/log/nginx:ro
+    depends_on:
+      - kafka
+      - nginx
+    networks:
+      - app-network
+
+  clickhouse-server:
+    image: yandex/clickhouse-server:latest
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - ./clickhouse/data:/var/lib/clickhouse
+      - ./clickhouse/conf:/etc/clickhouse-server
+      - ./clickhouse/logs:/var/log/clickhouse-server
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  nginx_logs:
+  zk_data:
+  zk_datalog:
+  kafka_data:
+  clickhouse_data:
+  clickhouse_logs: 
