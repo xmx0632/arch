@@ -168,3 +168,77 @@ docker-compose down -v
 ```
 
 
+## 参考日志
+
+### flume 启动日志
+```
+arch-flume-1  |         compression.type = none
+arch-flume-1  |         metric.reporters = []
+arch-flume-1  |         metadata.max.age.ms = 300000
+arch-flume-1  |         metadata.fetch.timeout.ms = 60000
+arch-flume-1  |         reconnect.backoff.ms = 50
+arch-flume-1  |         sasl.kerberos.ticket.renew.window.factor = 0.8
+arch-flume-1  |         bootstrap.servers = [kafka:9092]
+arch-flume-1  |         retry.backoff.ms = 1000
+arch-flume-1  |         sasl.kerberos.kinit.cmd = /usr/bin/kinit
+arch-flume-1  |         buffer.memory = 33554432
+arch-flume-1  |         timeout.ms = 30000
+arch-flume-1  |         key.serializer = class org.apache.kafka.common.serialization.StringSerializer
+arch-flume-1  |         sasl.kerberos.service.name = null
+arch-flume-1  |         sasl.kerberos.ticket.renew.jitter = 0.05
+arch-flume-1  |         ssl.keystore.type = JKS
+arch-flume-1  |         ssl.trustmanager.algorithm = PKIX
+arch-flume-1  |         block.on.buffer.full = false
+arch-flume-1  |         ssl.key.password = null
+arch-flume-1  |         max.block.ms = 60000
+arch-flume-1  |         sasl.kerberos.min.time.before.relogin = 60000
+arch-flume-1  |         connections.max.idle.ms = 540000
+arch-flume-1  |         ssl.truststore.password = null
+arch-flume-1  |         max.in.flight.requests.per.connection = 5
+arch-flume-1  |         metrics.num.samples = 2
+arch-flume-1  |         client.id = 
+arch-flume-1  |         ssl.endpoint.identification.algorithm = null
+arch-flume-1  |         ssl.protocol = TLS
+arch-flume-1  |         request.timeout.ms = 30000
+arch-flume-1  |         ssl.provider = null
+arch-flume-1  |         ssl.enabled.protocols = [TLSv1.2, TLSv1.1, TLSv1]
+arch-flume-1  |         acks = 1
+arch-flume-1  |         batch.size = 16384
+arch-flume-1  |         ssl.keystore.location = null
+arch-flume-1  |         receive.buffer.bytes = 32768
+arch-flume-1  |         ssl.cipher.suites = null
+arch-flume-1  |         ssl.truststore.type = JKS
+arch-flume-1  |         security.protocol = PLAINTEXT
+arch-flume-1  |         retries = 3
+arch-flume-1  |         max.request.size = 1048576
+arch-flume-1  |         value.serializer = class org.apache.kafka.common.serialization.ByteArraySerializer
+arch-flume-1  |         ssl.truststore.location = null
+arch-flume-1  |         ssl.keystore.password = null
+arch-flume-1  |         ssl.keymanager.algorithm = SunX509
+arch-flume-1  |         metrics.sample.window.ms = 30000
+arch-flume-1  |         partitioner.class = class org.apache.kafka.clients.producer.internals.DefaultPartitioner
+arch-flume-1  |         send.buffer.bytes = 131072
+arch-flume-1  |         linger.ms = 0
+arch-flume-1  | 
+arch-flume-1  | 2024-12-15 09:37:41,425 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:119)] Monitored counter group for type: SOURCE, name: source1: Successfully registered new MBean.
+arch-flume-1  | 2024-12-15 09:37:41,425 (lifecycleSupervisor-1-0) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:95)] Component type: SOURCE, name: source1 started
+arch-flume-1  | 2024-12-15 09:37:41,512 (lifecycleSupervisor-1-5) [INFO - org.apache.kafka.common.utils.AppInfoParser$AppInfo.<init>(AppInfoParser.java:82)] Kafka version : 0.9.0.1
+arch-flume-1  | 2024-12-15 09:37:41,516 (lifecycleSupervisor-1-5) [INFO - org.apache.kafka.common.utils.AppInfoParser$AppInfo.<init>(AppInfoParser.java:83)] Kafka commitId : 23c69d62a0cabf06
+arch-flume-1  | 2024-12-15 09:37:41,522 (lifecycleSupervisor-1-5) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.register(MonitoredCounterGroup.java:119)] Monitored counter group for type: SINK, name: sink1: Successfully registered new MBean.
+arch-flume-1  | 2024-12-15 09:37:41,523 (lifecycleSupervisor-1-5) [INFO - org.apache.flume.instrumentation.MonitoredCounterGroup.start(MonitoredCounterGroup.java:95)] Component type: SINK, name: sink1 started
+```
+
+
+### kafka 消费者日志
+
+```bash
+
+$ docker-compose exec kafka kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic flume_topic --from-beginning
+
+{"timestamp": "2024-12-15T09:30:38+00:00", "remote_addr": "192.168.112.1", "request_body": "", "agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" }
+{"timestamp": "2024-12-15T09:30:38+00:00", "remote_addr": "192.168.112.1", "request_body": "", "agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" }
+{"timestamp": "2024-12-15T09:30:38+00:00", "remote_addr": "192.168.112.1", "request_body": "", "agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" }
+{"timestamp": "2024-12-15T09:30:38+00:00", "remote_addr": "192.168.112.1", "request_body": "", "agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" }
+{"timestamp": "2024-12-15T09:30:39+00:00", "remote_addr": "192.168.112.1", "request_body": "", "agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" }
+
+```
