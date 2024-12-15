@@ -31,6 +31,7 @@ services:
       KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_CREATE_TOPICS: "flume_topic:1:1"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     volumes:
       - ./kafka/data:/var/lib/kafka/data
     depends_on:
@@ -40,54 +41,40 @@ services:
 
   flume:
     image: probablyfine/flume:latest
+    # image: probablyfine/flume:2.0.0
     volumes:
-      - ./flume/conf:/opt/flume/conf
+      - ./flume/conf/flume-kafka.conf:/opt/flume-config/flume.conf
+      - ./flume/conf/log4j.properties:/opt/flume-config/log4j.properties
       - ./nginx/logs:/var/log/nginx:ro
     depends_on:
       - kafka
       - nginx
+    command: ["flume-ng", "agent", "--conf-file", "/opt/flume-config/flume.conf"]
+    environment:
+      - FLUME_AGENT_NAME=agent1
+      - JAVA_OPTS="-Dlog4j.configuration=file:///opt/flume-config/log4j.properties"
     networks:
       - app-network
 
   clickhouse-server:
-    # image: yandex/clickhouse-server:latest
-    image: lunalabsltd/clickhouse-server:21.7.2.7-arm
+    # image: clickhouse/clickhouse-server:latest
+    # 或者使用特定版本
+    image: clickhouse/clickhouse-server:22.3.3.44
     platform: linux/arm64
     ports:
       - "8123:8123"
       - "9000:9000"
-    # volumes:
-    #   - ./clickhouse/data:/var/lib/clickhouse
-    #   - ./clickhouse/conf:/etc/clickhouse-server
-    #   - ./clickhouse/logs:/var/log/clickhouse-server
+    volumes:
+      - ./clickhouse/data:/var/lib/clickhouse
     environment:
       - CLICKHOUSE_DB=bi
       - CLICKHOUSE_USER=testing
       - CLICKHOUSE_PASSWORD=passwd
+      - CLICKHOUSE_MAX_SERVER_MEMORY_USAGE=2147483648
+      - CLICKHOUSE_MAX_SERVER_MEMORY_USAGE_TO_RAM_RATIO=0.9
     networks:
       - app-network
-
-    # container_name: ck-slave
-    #   image: lunalabsltd/clickhouse-server:21.7.2.7-arm
-    #   platform: linux/arm64
-    #   restart: always
-    #   ports:
-    #     - "18123:8123"
-    #     - "19000:9000"
-    #   environment:
-    #     - CLICKHOUSE_DB=bi
-    #     - CLICKHOUSE_USER=testing
-    #     - CLICKHOUSE_PASSWORD=passwd
-
 
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  nginx_logs:
-  zk_data:
-  zk_datalog:
-  kafka_data:
-  clickhouse_data:
-  clickhouse_logs: 
