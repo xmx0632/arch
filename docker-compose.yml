@@ -2,11 +2,13 @@ version: '3'
 
 services:
   nginx:
-    image: nginx:latest
+    # image: nginx:latest
+    image: nginx:1.21.3-alpine
     ports:
       - "80:80"
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf:ro
+      # - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/logs:/var/log/nginx
     networks:
       - app-network
@@ -48,16 +50,35 @@ services:
       - app-network
 
   clickhouse-server:
-    image: yandex/clickhouse-server:latest
+    # image: yandex/clickhouse-server:latest
+    image: lunalabsltd/clickhouse-server:21.7.2.7-arm
+    platform: linux/arm64
     ports:
       - "8123:8123"
       - "9000:9000"
-    volumes:
-      - ./clickhouse/data:/var/lib/clickhouse
-      - ./clickhouse/conf:/etc/clickhouse-server
-      - ./clickhouse/logs:/var/log/clickhouse-server
+    # volumes:
+    #   - ./clickhouse/data:/var/lib/clickhouse
+    #   - ./clickhouse/conf:/etc/clickhouse-server
+    #   - ./clickhouse/logs:/var/log/clickhouse-server
+    environment:
+      - CLICKHOUSE_DB=bi
+      - CLICKHOUSE_USER=testing
+      - CLICKHOUSE_PASSWORD=passwd
     networks:
       - app-network
+
+    # container_name: ck-slave
+    #   image: lunalabsltd/clickhouse-server:21.7.2.7-arm
+    #   platform: linux/arm64
+    #   restart: always
+    #   ports:
+    #     - "18123:8123"
+    #     - "19000:9000"
+    #   environment:
+    #     - CLICKHOUSE_DB=bi
+    #     - CLICKHOUSE_USER=testing
+    #     - CLICKHOUSE_PASSWORD=passwd
+
 
 networks:
   app-network:
