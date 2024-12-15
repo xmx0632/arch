@@ -66,10 +66,19 @@ docker-compose exec clickhouse-server clickhouse-client
 2. 执行以下SQL语句：
 
 ```sql
-sql
+
+// 启用实验特性
+SET allow_experimental_object_type = 1;
+
+use bi;
+
+// 创建一个Kafka队列
 CREATE TABLE queue1 (
 message String
 ) ENGINE = Kafka('kafka:9092', 'flume_topic', 'group1', 'JSONAsString');
+
+
+// 创建一个表，用于存储Kafka消息
 CREATE TABLE msg (
 id UUID,
 timestamp String,
@@ -77,6 +86,9 @@ remote_addr String,
 name String,
 agent String
 ) ENGINE = ReplacingMergeTree() ORDER BY id;
+
+
+// 创建一个视图，将Kafka消息转换为ClickHouse格式
 CREATE MATERIALIZED VIEW queue_msg TO msg AS
 SELECT
 generateUUIDv4() AS id,
@@ -108,7 +120,14 @@ docker-compose exec kafka kafka-console-consumer.sh \
 ### 3. 查询ClickHouse数据
 
 ```bash
-docker-compose exec clickhouse-server clickhouse-client --query "SELECT FROM msg"
+docker-compose exec clickhouse-server clickhouse-client --query "SELECT FROM bi.msg"
+
+# 查询所有字段
+docker-compose exec clickhouse-server clickhouse-client --query "SELECT * FROM bi.msg"
+
+
+# 或者指定具体字段
+docker-compose exec clickhouse-server clickhouse-client --query "SELECT id, timestamp, remote_addr, name, agent FROM bi.msg"
 
 ```
 
